@@ -421,17 +421,19 @@ void mainDisplay(void)
 		DIS(0x00); // «Âœ‘ æ
 				   //	segdsplay(1500);	 //∂Œœ‘ æ
 				   //   DIS(0x00);				 //«Âœ‘ æ
-				   /*
-						DELAY(2900);flash(1200);
-						DELAY(3900);DIS(0x00);
+				   
+						DELAY(90000);flash(1200);
+						DELAY(120000);DIS(0x00);
 						//∂¡≤‚ ‘
 						ii = 0x00;
 						WRITE_DAT(22,0x01);
 						DELAY(3900);//ODO¡¡
+		/*
 						ii = Read_DAT(22);
 						DELAY(900);
 						WRITE_DAT(23,ii);//TRIP¡¡
 						DELAY(3900);
-						DIS(0x00); */
+						DIS(0x00); 
+		*/
 	}
 }

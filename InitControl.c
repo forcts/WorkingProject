@@ -144,6 +144,7 @@ void CAN_GPIO_Config(void)
     /* Configure CAN RX pin */
     GPIO_InitStructure.Pin = GPIO_PIN_4;
     GPIO_InitStructure.GPIO_Mode = GPIO_PULL_UP;            // was GPIO_Mode_IPU;
+	  GPIO_InitStructure.GPIO_Alternate = GPIO_AF2_CAN;
     GPIO_Peripheral_Initialize(GPIOA, &GPIO_InitStructure); // was GPIO_InitPeripheral(GPIOA, &GPIO_InitStructure);
     /* Configure CAN TX pin */
     GPIO_InitStructure.Pin = GPIO_PIN_5;
