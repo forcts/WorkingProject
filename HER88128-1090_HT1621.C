@@ -398,26 +398,26 @@ void mainDisplay(void)
 {
 
 	uchar ii;	 //
-	SETUP_LCD(); // 初始化LCD
+	HT1621_Init(); // was SETUP_LCD(); // 初始化LCD
 	while (1)
 	{
 		LCD_BL_TOGGLE;
 
 		DIS(0xff);	 // 全显
-		DELAY(3000); // 延时显示停滞时间
+		DELAY(900000); // 延时显示停滞时间
 
 		DIS(0x00); // 清显示
-		DELAY(500);
+		DELAY(150000);
 
-		for (ii = 0; ii < 9; ii++)
+		for (ii = 0; ii < 10; ii++)
 		{
 			Dsplay1(ii); // 显示8字段
 			LCD_BL_TOGGLE;
-			DELAY(3000);
+			DELAY(900000);
 		}
 
 		DIS(0xff); // 全显
-		DELAY(1900);
+		DELAY(600000);
 		DIS(0x00); // 清显示
 				   //	segdsplay(1500);	 //段显示
 				   //   DIS(0x00);				 //清显示
