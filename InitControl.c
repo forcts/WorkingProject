@@ -212,10 +212,11 @@ void InitLCD(void)
     GPIO_InitStructure.GPIO_Slew_Rate = GPIO_SLEW_RATE_FAST;
     GPIO_Peripheral_Initialize(GPIOA, &GPIO_InitStructure);
 	
-	  //mainDisplay();
-
+	  mainDisplay();
+/*
     lcd_init();
     display_all();
+	*/
 
 }
 

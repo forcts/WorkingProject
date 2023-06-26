@@ -14,8 +14,9 @@ int main(void)
 	memset(&BMS_INFO, 0, sizeof(JBD_BMS));
 	InitControl();
 	InitTask();
-Loop:
-	TimeBaseHandle();
-	HandleSchedular();
-	goto Loop;
+	while(1)
+	{
+		TimeBaseHandle();
+		HandleSchedular();
+	}
 }

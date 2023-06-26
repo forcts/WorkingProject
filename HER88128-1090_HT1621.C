@@ -306,6 +306,94 @@ void flash(uint tt)
 	DELAY(tt);
 	WRITE_COM(0x03); // Display on
 }
+
+// 旧屏驱动
+
+/*
+ *    LCD 模式写入
+ *    入口:MODE :  0 ：COM(命令模式) /  1：DAT(数据模式)
+ *    出口:void
+*/
+void write_mode(unsigned char MODE)    //写入模式,数据or命令
+{
+    mLCD_WR(LOW);
+    DELAY(2);
+    mLCD_DATA(HIGH);//SET_DATA;     //DATA=1
+    DELAY(2);
+    mLCD_WR(HIGH);//SET_WR;
+    DELAY(2);
+ 
+    mLCD_WR(LOW);//RST_WR;       //WR = 0;
+    DELAY(2);
+    mLCD_DATA(LOW);//RST_DATA;     //DATA = 0;
+    DELAY(2);
+    mLCD_WR(HIGH);//SET_WR;       //WR = 1;
+    DELAY(2);
+ 
+    mLCD_WR(LOW);//RST_WR;                                 
+    DELAY(2);
+ 
+    if (MODE)
+    {
+      mLCD_DATA(HIGH);//SET_DATA;  //DATA = 1;  写数据模式
+    }
+    else
+    {
+      mLCD_DATA(LOW);//RST_DATA; //DATA = 0;  写命令模式
+    }
+    DELAY(2);
+    mLCD_WR(HIGH);//SET_WR;                                   
+    DELAY(2);
+}
+
+//Write the high BitSize of the Data to the HT1621
+void SendBit_HT1621(uint8_t Data, uint8_t BitSize)
+{
+    uint8_t i;
+    for(i=0;i<BitSize;i++)
+    {
+        if(Data & 0x80)
+        {
+            mLCD_DATA(HIGH);
+        }
+        else
+        {
+            mLCD_DATA(LOW);
+        }
+		mLCD_WR(LOW);
+		DELAY(2);
+        mLCD_WR(HIGH);
+        DELAY(2);
+        Data<<=1;
+    }
+}
+
+void HT1621_Init(void)
+{
+    mLCD_BL(ON);
+    mLCD_CS(HIGH);
+    mLCD_WR(HIGH);
+    mLCD_DATA(HIGH);
+	
+	mLCD_CS(LOW);
+    DELAY(2);
+	
+	write_mode(0);
+	
+	SendBit_HT1621(0x01, 9);//Write 9 bit cmd   0x01
+	SendBit_HT1621(0x03, 9);//Write 9 bit cmd   0x03
+	SendBit_HT1621(0x04, 9);
+	SendBit_HT1621(0x05, 9);//Write 9 bit cmd  0x05	
+	SendBit_HT1621(0x18, 9);//Write 9 bit cmd   0x18
+	SendBit_HT1621(0x29, 9);//Write 9 bit cmd    0x29
+	SendBit_HT1621(0x80, 9);	
+	SendBit_HT1621(0xE3, 9);//Write 9 bit cmd   0x18
+
+    DELAY(100);
+}
+
+// 旧屏驱动
+
 void mainDisplay(void)
 {
 
