@@ -22,6 +22,8 @@ typedef struct
 	u8 DC_Rx_Pos;			// DC接收缓存下标
 	u8 DC_Tx[DC_Tx_MAX];	// DC发送缓存
 	u8 DC_Tx_Pos;			// DC发送缓存下标
+	u8 ChargingFlag;        // 充电中标志, 只能赋值0或1
+	u8 ReChargingFlag;      // 重新充电中标志, 只能赋值0或1
 
 	/*全局变量添加到该结构体*/
 } Global_Var;

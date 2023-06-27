@@ -1,17 +1,11 @@
-// HHR88128-1049测试程序  AT89S52	12M
-// LIQIAN
-// 2023-3-31
-// 测试程序    修改中
 #include <LCDCtrol.h>
+#include <main.h>
 
-typedef unsigned char uchar;
+// 依次显示出        	0    1    2    3    4    5    6    7    8    9
 
-// 依次显示出        	0    1    2    3    4    5    6    7    8
+u8 data_table1[] = {0x0F, 0x00, 0x0B, 0x09, 0x04, 0x0D, 0x0F, 0x08, 0x0F, 0x0D}; // AFED数码8421
+u8 data_table2[] = {0x0A, 0x0A, 0x0C, 0x0E, 0x0E, 0x06, 0x06, 0x0A, 0x0E, 0x0E}; // BGC*数码8421
 
-uchar data_table1[] = {0x0F, 0x00, 0x0B, 0x09, 0x04, 0x0D, 0x0F, 0x08, 0x0F, 0x0F}; // AFED数码8421
-uchar data_table2[] = {0x0A, 0x0A, 0x0C, 0x0E, 0x0E, 0x06, 0x06, 0x0A, 0x0E, 0x0F}; // BGC*数码8421
-
-//*******************延时子程序*******************//
 void DELAY(long int t)
 {
 	int i, j;
@@ -20,10 +14,9 @@ void DELAY(long int t)
 			;
 }
 
-/*-------写指令U1-----------*/
-void WRITE_COM(uchar com)
+void WRITE_COM(u8 com)
 {
-	uchar i, k;
+	u8 i, k;
 	LCD_CS_LOW; // _CS1 = 0;
 	DELAY(2);
 	k = 0x80;
@@ -55,11 +48,12 @@ void WRITE_COM(uchar com)
 		k <<= 1;
 	}
 	LCD_CS_HIGH; // _CS1 = 1;
+	DELAY(2);
 }
-/*--------写数据U1-----------*/
-void WRITE_DAT(uchar addr, uchar dat)
+
+void WRITE_DAT(u8 addr, u8 dat)
 {
-	uchar i, k;
+	u8 i, k;
 	LCD_CS_LOW; // _CS1 = 0;
 	DELAY(2);
 
@@ -106,13 +100,14 @@ void WRITE_DAT(uchar addr, uchar dat)
 		k >>= 1;
 	}
 	LCD_CS_HIGH; // _CS1 = 1;
+	DELAY(2);
 }
 
 /*---------写全屏数据------------*/
-void DIS(uchar dat)
+void DIS(u8 dat)
 {
-	uchar i;
-	for (i = 0; i < 32; i++)
+	u8 i;
+	for (i = 0; i < 12; i++)
 	{
 		WRITE_DAT(i, dat);
 		DELAY(200);
@@ -135,48 +130,87 @@ void SETUP_LCD(void)
 	// WRITE_COM(0x80); // Disable IRQ output, 背光打开
 	DIS(0x00);
 }
-/*  ----------------- 8字显示 ------------- */
-void Dsplay1(char c)
-{
-	uchar i;
-	for (i = 0; i < 6;) //(U1)
-	{
-		WRITE_DAT(i, data_table1[c]);
-		i++;
-		WRITE_DAT(i, data_table2[c] >> 1);
-		i++;
-	}
-	for (i = 7; i < 11;) //(U1)
-	{
-		WRITE_DAT(i, data_table2[c]);
-		i++;
-		WRITE_DAT(i, data_table1[c]);
-		i++;
-	}
 
-	LCD_BL_TOGGLE;
+void ShowRSOC(u8 n) // 电量显示
+{
+	if (n > 99)
+	{
+		WRITE_DAT(7, data_table2[0] | 1);
+		WRITE_DAT(8, data_table1[0]);
+		WRITE_DAT(9, data_table2[0] | 1);
+		WRITE_DAT(10, data_table1[0]);
+		WRITE_DAT(6, 0b1111);
+		WRITE_DAT(11, 0b1111);
+		return;
+	}
+	u8 t10, t1;
+	t1 = n % 10;
+	t10 = (n - t1) / 10;
+	WRITE_DAT(9, data_table2[t10]);
+	WRITE_DAT(10, data_table1[t10]);
+	WRITE_DAT(7, data_table2[t1] | 1);
+	WRITE_DAT(8, data_table1[t1]);
+	t1 = (n << 3) / 100;
+	if (t1 < 4)
+	{
+		WRITE_DAT(11, (1 << (t1 + 1)) - 1);
+	}
+	else
+	{
+		WRITE_DAT(11, 0b1111);
+		WRITE_DAT(6, ((1 << (t1 - 3)) - 1) << (7 - t1));
+	}
+}
+
+void ShowErrorAndCharges(u8 n) // 错误显示, 大于9清空
+{
+	if (n > 9)
+	{
+		WRITE_DAT(2, 0);
+		WRITE_DAT(3, Global.ChargingFlag << 3);
+		WRITE_DAT(4, 0);
+		WRITE_DAT(5, Global.ReChargingFlag << 3);
+		return;
+	}
+	WRITE_DAT(2, 0b1111);
+	WRITE_DAT(3, 0b10 | (Global.ChargingFlag << 3));
+	WRITE_DAT(4, data_table1[n]);
+	WRITE_DAT(5, (data_table2[n] >> 1) | (Global.ReChargingFlag << 3));
+}
+
+void ShowNoNum(u8 n) // 显示机器序号，大于9清空
+{
+	if (n > 9)
+	{
+		WRITE_DAT(0, 0);
+		WRITE_DAT(1, 0);
+		return;
+	}
+	WRITE_DAT(0, data_table1[n]);
+	WRITE_DAT(1, (data_table2[n] >> 1) | 0b1000);
 }
 
 void mainDisplay(void)
 {
-
-	uchar ii;	 //
+	u8 t; //
 	SETUP_LCD(); // 初始化LCD
 	while (1)
 	{
-		LCD_BL_TOGGLE;
-		DIS(0xff);	   // 全显
-		DELAY(900000); // 延时显示停滞时间
-		DIS(0x00);	   // 清显示
-		DELAY(150000);
-		for (ii = 0; ii < 10; ii++)
-		{
-			Dsplay1(ii); // 显示8字段
-			LCD_BL_TOGGLE;
-			DELAY(900000);
-		}
-		DIS(0xff); // 全显
-		DELAY(600000);
 		DIS(0x00); // 清显示
+		for (t = 0; t < 11; t++)
+		{
+			ShowNoNum(t);
+			DELAY(100000);
+		}
+		for (t = 0; t < 11; t++)
+		{
+			ShowErrorAndCharges(t);
+			DELAY(100000);
+		}
+		for (t = 0; t < 101; t++)
+		{
+			ShowRSOC(t);
+			DELAY(100000);
+		}
 	}
 }

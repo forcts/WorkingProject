@@ -143,8 +143,8 @@ void CAN_GPIO_Config(void)
     RCC_AHB_Peripheral_Clock_Enable(RCC_AHB_PERIPH_GPIOA);
     /* Configure CAN RX pin */
     GPIO_InitStructure.Pin = GPIO_PIN_4;
-    GPIO_InitStructure.GPIO_Mode = GPIO_PULL_UP;            // was GPIO_Mode_IPU;
-	  GPIO_InitStructure.GPIO_Alternate = GPIO_AF2_CAN;
+    GPIO_InitStructure.GPIO_Mode = GPIO_PULL_UP; // was GPIO_Mode_IPU;
+    GPIO_InitStructure.GPIO_Alternate = GPIO_AF2_CAN;
     GPIO_Peripheral_Initialize(GPIOA, &GPIO_InitStructure); // was GPIO_InitPeripheral(GPIOA, &GPIO_InitStructure);
     /* Configure CAN TX pin */
     GPIO_InitStructure.Pin = GPIO_PIN_5;
@@ -212,13 +212,12 @@ void InitLCD(void)
     GPIO_InitStructure.GPIO_Mode = GPIO_MODE_OUT_PP;
     GPIO_InitStructure.GPIO_Slew_Rate = GPIO_SLEW_RATE_FAST;
     GPIO_Peripheral_Initialize(GPIOA, &GPIO_InitStructure);
-	
-	  mainDisplay();
-/*
+
+    mainDisplay();
+    /*
     lcd_init();
     display_all();
-	*/
-
+    */
 }
 
 void InitUart(void)
@@ -227,7 +226,7 @@ void InitUart(void)
     /* Enable the USARTz Interrupt */
     NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
     // NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = NVIC_PER_PRIORITY_2; // was 0x02;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = NVIC_SUB_PRIORITY_2;        // was 0x02;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = NVIC_SUB_PRIORITY_2; // was 0x02;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Initializes(&NVIC_InitStructure); // was NVIC_Init(&NVIC_InitStructure);
 
@@ -241,10 +240,10 @@ void InitUart(void)
     GPIO_InitStructure.GPIO_Mode = GPIO_MODE_AF_PP;          // was GPIO_Mode_AF_PP;
     GPIO_InitStructure.GPIO_Slew_Rate = GPIO_SLEW_RATE_FAST; // was GPIO_Speed_50MHz;
     GPIO_InitStructure.GPIO_Alternate = GPIO_AF5_USART2;
-    GPIO_Peripheral_Initialize(GPIOA, &GPIO_InitStructure);  // was GPIO_InitPeripheral(UART2_GPIO, &GPIO_InitStructure);
+    GPIO_Peripheral_Initialize(GPIOA, &GPIO_InitStructure); // was GPIO_InitPeripheral(UART2_GPIO, &GPIO_InitStructure);
     /* Configure Rx as alternate function push-pull and pull-up */
     GPIO_InitStructure.Pin = GPIO_PIN_3;
-    //GPIO_InitStructure.GPIO_Mode = GPIO_MODE_INPUT;         // was GPIO_Mode_IN_FLOATING;
+    // GPIO_InitStructure.GPIO_Mode = GPIO_MODE_INPUT;         // was GPIO_Mode_IN_FLOATING;
     GPIO_Peripheral_Initialize(GPIOA, &GPIO_InitStructure); // was GPIO_InitPeripheral(UART2_GPIO, &GPIO_InitStructure);
 
     USART_InitType USART_InitStructure;
