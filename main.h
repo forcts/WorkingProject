@@ -1,32 +1,12 @@
-#ifndef __MAIN_H__
-#define __MAIN_H__
-
 #include "n32g430.h"
+#include "schedularAlgorithm.h"
+#include "LCDCtrol.h"
 
 #define BMS_NTC_MAX 10
 #define BMS_CELL_MAX 32
 #define BMS_Rx_MAX 100
 #define DC_Rx_MAX 100
 #define DC_Tx_MAX 100
-
-typedef struct
-{
-	u8 BMS_Receive_Timeout; // BMS通讯超时
-	u8 BMS_Receive_Error;	// BMS通讯错误
-	u8 BMS_Send_Flag;		// BMS发送标志
-	u8 DC_Receive_Timeout;	// DC通讯超时
-	u8 DC_Receive_Error;	// DC通讯错误
-	u8 BMS_Rx[BMS_Rx_MAX];	// BMS接收缓存
-	u8 BMS_Rx_Pos;			// BMS接收缓存下标
-	u8 DC_Rx[DC_Rx_MAX];	// DC接收缓存
-	u8 DC_Rx_Pos;			// DC接收缓存下标
-	u8 DC_Tx[DC_Tx_MAX];	// DC发送缓存
-	u8 DC_Tx_Pos;			// DC发送缓存下标
-	u8 ChargingFlag;        // 充电中标志, 只能赋值0或1
-	u8 ReChargingFlag;      // 重新充电中标志, 只能赋值0或1
-
-	/*全局变量添加到该结构体*/
-} Global_Var;
 
 union BAT_FAULT
 {
@@ -99,7 +79,27 @@ typedef struct
 	u16 Cell_Vol[BMS_CELL_MAX];		// 单体电压
 } JBD_BMS;
 
-extern Global_Var Global;
-extern JBD_BMS BMS_INFO;
+typedef struct
+{
+	u8 BMS_Receive_Timeout; // BMS通讯超时
+	u8 BMS_Receive_Error;	// BMS通讯错误
+	u8 BMS_Send_Flag;		// BMS发送标志
+	u8 DC_Receive_Timeout;	// DC通讯超时
+	u8 DC_Receive_Error;	// DC通讯错误
+	u8 BMS_Rx[BMS_Rx_MAX];	// BMS接收缓存
+	u8 BMS_Rx_Pos;			// BMS接收缓存下标
+	u8 DC_Rx[DC_Rx_MAX];	// DC接收缓存
+	u8 DC_Rx_Pos;			// DC接收缓存下标
+	u8 DC_Tx[DC_Tx_MAX];	// DC发送缓存
+	u8 DC_Tx_Pos;			// DC发送缓存下标
+	u8 ChargingFlag;		// 充电中标志, 只能赋值0或1
+	u8 ReChargingFlag;		// 重新充电中标志, 只能赋值0或1
+	u8 BMS_ID;				// BMS ID
+	u8 BMS_Errors;			// BMS报错信息显示
+	JBD_BMS BMS_INFO;		// BMS信息
+} Global_Var;
 
-#endif /* __MAIN_H__ */
+extern Global_Var Global;
+
+void InitControl(void);
+void InitTask(void);

@@ -36,4 +36,8 @@
 
 void lcd_init(void);
 void display_all(void);
+
 void mainDisplay(void);
+void ShowRSOC(u8 n);
+void ShowErrorAndCharges(u8 n);
+void ShowNoNum(u8 n);

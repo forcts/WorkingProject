@@ -164,7 +164,7 @@ void ShowRSOC(u8 n) // 电量显示
 
 void ShowErrorAndCharges(u8 n) // 错误显示, 大于9清空
 {
-	if (n > 9)
+	if (n > 9 || n == 0)
 	{
 		WRITE_DAT(2, 0);
 		WRITE_DAT(3, Global.ChargingFlag << 3);
@@ -192,25 +192,8 @@ void ShowNoNum(u8 n) // 显示机器序号，大于9清空
 
 void mainDisplay(void)
 {
-	u8 t; //
 	SETUP_LCD(); // 初始化LCD
-	while (1)
-	{
-		DIS(0x00); // 清显示
-		for (t = 0; t < 11; t++)
-		{
-			ShowNoNum(t);
-			DELAY(100000);
-		}
-		for (t = 0; t < 11; t++)
-		{
-			ShowErrorAndCharges(t);
-			DELAY(100000);
-		}
-		for (t = 0; t < 101; t++)
-		{
-			ShowRSOC(t);
-			DELAY(100000);
-		}
-	}
+	DIS(0xff); 
+	DELAY(600000);
+	DIS(0x00);
 }

@@ -49,47 +49,47 @@ void DecodeBMS(void)
 	j = 5;
 	if (Global.BMS_Send_Flag)
 	{
-		BMS_INFO.Bat_V = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
+		Global.BMS_INFO.Bat_V = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
 		j += 2;
-		BMS_INFO.Bat_I = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
+		Global.BMS_INFO.Bat_I = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
 		j += 2;
-		BMS_INFO.Surplus_Capacity = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
+		Global.BMS_INFO.Surplus_Capacity = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
 		j += 2;
-		BMS_INFO.Nominal_Capacity = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
+		Global.BMS_INFO.Nominal_Capacity = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
 		j += 2;
-		BMS_INFO.Cycle_Cnt = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
+		Global.BMS_INFO.Cycle_Cnt = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
 		j += 2;
-		BMS_INFO.Production_Date = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
+		Global.BMS_INFO.Production_Date = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
 		j += 2;
-		BMS_INFO.Equalize_Sta_L = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
+		Global.BMS_INFO.Equalize_Sta_L = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
 		j += 2;
-		BMS_INFO.Equalize_Sta_H = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
+		Global.BMS_INFO.Equalize_Sta_H = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
 		j += 2;
-		BMS_INFO.Fault_Sta.all = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
+		Global.BMS_INFO.Fault_Sta.all = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
 		j++;
-		BMS_INFO.Soft_Ver = Global.BMS_Rx[j++];
-		BMS_INFO.RSOC = Global.BMS_Rx[j++];
-		BMS_INFO.Fet_Sta = Global.BMS_Rx[j++];
-		BMS_INFO.Cell_Num = Global.BMS_Rx[j++];
-		BMS_INFO.Alarm_Sta.all = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
+		Global.BMS_INFO.Soft_Ver = Global.BMS_Rx[j++];
+		Global.BMS_INFO.RSOC = Global.BMS_Rx[j++];
+		Global.BMS_INFO.Fet_Sta = Global.BMS_Rx[j++];
+		Global.BMS_INFO.Cell_Num = Global.BMS_Rx[j++];
+		Global.BMS_INFO.Alarm_Sta.all = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
 		j += 2;
-		BMS_INFO.Ambient_Temp = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
+		Global.BMS_INFO.Ambient_Temp = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
 		j += 2;
-		BMS_INFO.Fet_Temp = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
+		Global.BMS_INFO.Fet_Temp = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
 		j++;
-		BMS_INFO.NTC_Num = Global.BMS_Rx[j++];
+		Global.BMS_INFO.NTC_Num = Global.BMS_Rx[j++];
 		for (S = 0; j < Global.BMS_Rx_Pos - 3; j++)
 		{
-			BMS_INFO.NTC_Value[S++] = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
+			Global.BMS_INFO.NTC_Value[S++] = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
 			j++;
 		}
 	}
 	else
 	{
-		BMS_INFO.Cell_Num = Global.BMS_Rx[j] >> 1;
+		Global.BMS_INFO.Cell_Num = Global.BMS_Rx[j] >> 1;
 		for (S = 0; j < Global.BMS_Rx_Pos - 3; j++)
 		{
-			BMS_INFO.Cell_Vol[S++] = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
+			Global.BMS_INFO.Cell_Vol[S++] = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
 			j++;
 		}
 	}
