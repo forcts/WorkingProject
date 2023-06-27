@@ -230,7 +230,7 @@ void InitUart(void)
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Initializes(&NVIC_InitStructure); // was NVIC_Init(&NVIC_InitStructure);
 
-    RCC_AHB_Peripheral_Clock_Enable(RCC_AHB_PERIPH_GPIOA);    // test
+    RCC_AHB_Peripheral_Clock_Enable(RCC_AHB_PERIPH_GPIOA);
     RCC_APB1_Peripheral_Clock_Enable(RCC_APB1_PERIPH_USART2); // was RCC_EnableAPB1PeriphClk(RCC_APB1_PERIPH_USART2, ENABLE);
 
     GPIO_InitType GPIO_InitStructure;
@@ -247,7 +247,7 @@ void InitUart(void)
     GPIO_Peripheral_Initialize(GPIOA, &GPIO_InitStructure); // was GPIO_InitPeripheral(UART2_GPIO, &GPIO_InitStructure);
 
     USART_InitType USART_InitStructure;
-    USART_Reset(USART2); // was USART_DeInit(USART2);
+    // test USART_Reset(USART2); // was USART_DeInit(USART2);
     USART_InitStructure.BaudRate = 9600;
     USART_InitStructure.WordLength = USART_WL_8B;
     USART_InitStructure.StopBits = USART_STPB_1;

@@ -95,7 +95,6 @@ typedef struct
 	u8 ChargingFlag;		// 充电中标志, 只能赋值0或1
 	u8 ReChargingFlag;		// 重新充电中标志, 只能赋值0或1
 	u8 BMS_ID;				// BMS ID
-	u8 BMS_Errors;			// BMS报错信息显示
 	JBD_BMS BMS_INFO;		// BMS信息
 } Global_Var;
 

@@ -9,8 +9,15 @@ void CommuToDCTask(void)
 void DisplayTask(void)
 {
 	ShowRSOC(Global.BMS_INFO.RSOC);
-	ShowErrorAndCharges(Global.BMS_Errors);
 	ShowNoNum(Global.BMS_ID);
+	if (Global.BMS_Receive_Error)
+		ShowErrorAndCharges(1); // BMS通讯错误
+	else if (Global.BMS_Receive_Timeout)
+		ShowErrorAndCharges(2); // BMS通讯超时
+	else if (Global.DC_Receive_Timeout)
+		ShowErrorAndCharges(3); // DC通讯超时
+	else if (Global.DC_Receive_Error)
+		ShowErrorAndCharges(4); // DC通讯错误
 }
 
 void InitTask(void)
