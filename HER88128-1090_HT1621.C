@@ -103,7 +103,7 @@ void WRITE_DAT(u8 addr, u8 dat)
 }
 
 /*---------写全屏数据------------*/
-void DIS(u8 dat)
+void DIS(u8 dat) // 0xf 全显， 0 全灭
 {
 	u8 i;
 	for (i = 0; i < 12; i++)
@@ -119,14 +119,7 @@ void SETUP_LCD(void)
 	WRITE_COM(0x01); // Enable system
 	WRITE_COM(0x18); // CLOCK SOURCE IS 256kRC ON CHIP
 	WRITE_COM(0x29); // BIAS=1/3 DUTY=1/4(29),1/2B,1/2D(20),1/2B 1/4D(28)
-	// WRITE_COM(0x02); // Display off
 	WRITE_COM(0x03); // Display on
-	// WRITE_COM(0x0E); // Clear the contents of WDT stage
-	// WRITE_COM(0x07); // Enable WDT time-out flag output
-	// WRITE_COM(0xA7); // Time base/WDT clock output:128Hz
-	// WRITE_COM(0x88); // Enable IRQ output，背光关闭
-	// // DELAY(2000);			 //延时显示停滞时间
-	// WRITE_COM(0x80); // Disable IRQ output, 背光打开
 	DIS(0x00);
 }
 
@@ -174,7 +167,7 @@ void ShowErrorAndCharges(u8 n) // 错误显示, 大于9清空
 	WRITE_DAT(5, (data_table2[n] >> 1) | (Global.ReChargingFlag << 3));
 }
 
-void ShowNoNum(u8 n) // 显示机器序号，大于9清空
+void ShowNoNum(u8 n) // 显示机器序号
 {
 	n %= 10;
 	WRITE_DAT(0, data_table1[n]);
@@ -184,7 +177,7 @@ void ShowNoNum(u8 n) // 显示机器序号，大于9清空
 void mainDisplay(void)
 {
 	SETUP_LCD(); // 初始化LCD
-	DIS(0xff);
-	DELAY(900000);
-	DIS(0x00);
+	DIS(0xf);
+	DELAY(9000000);
+	DIS(0);
 }

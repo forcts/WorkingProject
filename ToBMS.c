@@ -30,7 +30,7 @@ void CommuToBMSTask(void)
 void DecodeBMS(void)
 {
 	/* ะฃั้ */
-	if ((Global.BMS_Rx[1] != 0x00) || (Global.BMS_Rx[1] != 0x00) || (Global.BMS_Rx[2] != 4 - Global.BMS_Send_Flag))
+	if ((Global.BMS_Rx[1] != 0x00) || (Global.BMS_Rx[3] != 0x00) || (Global.BMS_Rx[2] != 4 - Global.BMS_Send_Flag))
 	{
 		Global.BMS_Receive_Error = 1;
 		return;
