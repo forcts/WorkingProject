@@ -132,17 +132,8 @@ void SETUP_LCD(void)
 
 void ShowRSOC(u8 n) // 电量显示
 {
-	if (n > 99)
-	{
-		WRITE_DAT(7, data_table2[0] | 1);
-		WRITE_DAT(8, data_table1[0]);
-		WRITE_DAT(9, data_table2[0] | 1);
-		WRITE_DAT(10, data_table1[0]);
-		WRITE_DAT(6, 0b1111);
-		WRITE_DAT(11, 0b1111);
-		return;
-	}
 	u8 t10, t1;
+	n %= 101;
 	t1 = n % 10;
 	t10 = (n - t1) / 10;
 	WRITE_DAT(9, data_table2[t10]);
@@ -150,14 +141,20 @@ void ShowRSOC(u8 n) // 电量显示
 	WRITE_DAT(7, data_table2[t1] | 1);
 	WRITE_DAT(8, data_table1[t1]);
 	t1 = (n << 3) / 100;
-	if (t1 < 4)
+	if (t1 < 5)
 	{
-		WRITE_DAT(11, (1 << (t1 + 1)) - 1);
+		WRITE_DAT(11, (1 << t1) - 1);
+		WRITE_DAT(6, 0);
 	}
 	else
 	{
 		WRITE_DAT(11, 0b1111);
-		WRITE_DAT(6, ((1 << (t1 - 3)) - 1) << (7 - t1));
+		WRITE_DAT(6, ((1 << (t1 - 4)) - 1) << (8 - t1));
+		if (t1 == 8)
+		{
+			WRITE_DAT(9, data_table2[0] | 1);
+			WRITE_DAT(10, data_table1[0]);
+		}
 	}
 }
 
@@ -179,12 +176,7 @@ void ShowErrorAndCharges(u8 n) // 错误显示, 大于9清空
 
 void ShowNoNum(u8 n) // 显示机器序号，大于9清空
 {
-	if (n > 9)
-	{
-		WRITE_DAT(0, 0);
-		WRITE_DAT(1, 0);
-		return;
-	}
+	n %= 10;
 	WRITE_DAT(0, data_table1[n]);
 	WRITE_DAT(1, (data_table2[n] >> 1) | 0b1000);
 }
@@ -192,7 +184,7 @@ void ShowNoNum(u8 n) // 显示机器序号，大于9清空
 void mainDisplay(void)
 {
 	SETUP_LCD(); // 初始化LCD
-	DIS(0xff); 
-	DELAY(600000);
+	DIS(0xff);
+	DELAY(900000);
 	DIS(0x00);
 }

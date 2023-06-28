@@ -14,16 +14,16 @@ void CommuToBMSTask(void)
 	static u8 i = 0;
 	for (i = 0; i < 8; i++)
 	{
-		while (USART_Flag_Status_Get(USART2, USART_FLAG_TXC) == RESET)
-			;
 		if (Global.BMS_Send_Flag) // 读取BMS基本信息
 		{
-			USART2->DAT = Get_BMS_Info[i];
+			USART_Data_Send(USART2, Get_BMS_Info[i]); // USART2->DAT = Get_BMS_Info[i];
 		}
 		else // 读取单体电压
 		{
-			USART2->DAT = Get_Cell_Info[i];
+			USART_Data_Send(USART2, Get_Cell_Info[i]); // USART2->DAT = Get_Cell_Info[i];
 		}
+		while (USART_Flag_Status_Get(USART2, USART_FLAG_TXDE) == RESET) // was USART_FLAG_TXC
+			;
 	}
 }
 

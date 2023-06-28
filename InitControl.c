@@ -238,7 +238,7 @@ void InitUart(void)
     /* Configure Tx as alternate function push-pull */
     GPIO_InitStructure.Pin = GPIO_PIN_2;
     GPIO_InitStructure.GPIO_Mode = GPIO_MODE_AF_PP;          // was GPIO_Mode_AF_PP;
-    GPIO_InitStructure.GPIO_Slew_Rate = GPIO_SLEW_RATE_FAST; // was GPIO_Speed_50MHz;
+    // GPIO_InitStructure.GPIO_Slew_Rate = GPIO_SLEW_RATE_FAST; // was GPIO_Speed_50MHz;
     GPIO_InitStructure.GPIO_Alternate = GPIO_AF5_USART2;
     GPIO_Peripheral_Initialize(GPIOA, &GPIO_InitStructure); // was GPIO_InitPeripheral(UART2_GPIO, &GPIO_InitStructure);
     /* Configure Rx as alternate function push-pull and pull-up */
@@ -247,7 +247,7 @@ void InitUart(void)
     GPIO_Peripheral_Initialize(GPIOA, &GPIO_InitStructure); // was GPIO_InitPeripheral(UART2_GPIO, &GPIO_InitStructure);
 
     USART_InitType USART_InitStructure;
-    // test USART_Reset(USART2); // was USART_DeInit(USART2);
+    USART_Reset(USART2); // was USART_DeInit(USART2);
     USART_InitStructure.BaudRate = 9600;
     USART_InitStructure.WordLength = USART_WL_8B;
     USART_InitStructure.StopBits = USART_STPB_1;
