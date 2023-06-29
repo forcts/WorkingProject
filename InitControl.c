@@ -222,41 +222,43 @@ void InitLCD(void)
 
 void InitUart(void)
 {
-    NVIC_InitType NVIC_InitStructure;
-    /* Enable the USARTz Interrupt */
+    NVIC_InitType NVIC_InitStructure; // ÷–∂œ≈‰÷√
     NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
-    // NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = NVIC_PER_PRIORITY_2; // was 0x02;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = NVIC_SUB_PRIORITY_2; // was 0x02;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = NVIC_SUB_PRIORITY_2;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Initializes(&NVIC_InitStructure); // was NVIC_Init(&NVIC_InitStructure);
+    NVIC_Initializes(&NVIC_InitStructure);
 
     RCC_AHB_Peripheral_Clock_Enable(RCC_AHB_PERIPH_GPIOA);
-    RCC_APB1_Peripheral_Clock_Enable(RCC_APB1_PERIPH_USART2); // was RCC_EnableAPB1PeriphClk(RCC_APB1_PERIPH_USART2, ENABLE);
+    RCC_APB1_Peripheral_Clock_Enable(RCC_APB1_PERIPH_USART2);
 
-    GPIO_InitType GPIO_InitStructure;
-    GPIO_Structure_Initialize(&GPIO_InitStructure); // was GPIO_InitStruct(&GPIO_InitStructure);
-    /* Configure Tx as alternate function push-pull */
-    GPIO_InitStructure.Pin = GPIO_PIN_2;
-    GPIO_InitStructure.GPIO_Mode = GPIO_MODE_AF_PP;          // was GPIO_Mode_AF_PP;
-    // GPIO_InitStructure.GPIO_Slew_Rate = GPIO_SLEW_RATE_FAST; // was GPIO_Speed_50MHz;
+    GPIO_InitType GPIO_InitStructure; // GPIO ≈‰÷√
+    GPIO_Structure_Initialize(&GPIO_InitStructure);
+    GPIO_InitStructure.Pin = GPIO_PIN_2; // TX
+    GPIO_InitStructure.GPIO_Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStructure.GPIO_Slew_Rate = GPIO_SLEW_RATE_FAST;
     GPIO_InitStructure.GPIO_Alternate = GPIO_AF5_USART2;
-    GPIO_Peripheral_Initialize(GPIOA, &GPIO_InitStructure); // was GPIO_InitPeripheral(UART2_GPIO, &GPIO_InitStructure);
-    /* Configure Rx as alternate function push-pull and pull-up */
-    GPIO_InitStructure.Pin = GPIO_PIN_3;
-    // GPIO_InitStructure.GPIO_Mode = GPIO_MODE_INPUT;         // was GPIO_Mode_IN_FLOATING;
-    GPIO_Peripheral_Initialize(GPIOA, &GPIO_InitStructure); // was GPIO_InitPeripheral(UART2_GPIO, &GPIO_InitStructure);
+    GPIO_Peripheral_Initialize(GPIOA, &GPIO_InitStructure);
+    GPIO_InitStructure.Pin = GPIO_PIN_3; // RX
+    GPIO_Peripheral_Initialize(GPIOA, &GPIO_InitStructure);
 
-    USART_InitType USART_InitStructure;
-    USART_Reset(USART2); // was USART_DeInit(USART2);
+    USART_InitType USART_InitStructure; // Õ®—∂≈‰÷√
+    USART_Reset(USART2);
     USART_InitStructure.BaudRate = 9600;
     USART_InitStructure.WordLength = USART_WL_8B;
     USART_InitStructure.StopBits = USART_STPB_1;
     USART_InitStructure.Parity = USART_PE_NO;
     USART_InitStructure.HardwareFlowControl = USART_HFCTRL_NONE;
     USART_InitStructure.Mode = USART_MODE_RX | USART_MODE_TX;
-    USART_Initializes(USART2, &USART_InitStructure); // was USART_Init(USART2, &USART_InitStructure);
-    USART_Interrput_Enable(USART2, USART_INT_RXDNE); // was USART_ConfigInt(USART2, USART_INT_RXDNE, ENABLE);
-    USART_Enable(USART2);                            // was USART_Enable(USART2, ENABLE);
+    USART_Initializes(USART2, &USART_InitStructure);
+    USART_Interrput_Enable(USART2, USART_INT_RXDNE);
+    USART_Enable(USART2);
+
+    RCC_AHB_Peripheral_Clock_Enable(RCC_AHB_PERIPH_GPIOB); //  πƒ‹485–æ∆¨
+    GPIO_Structure_Initialize(&GPIO_InitStructure);
+    GPIO_InitStructure.Pin = GPIO_PIN_1;
+    GPIO_InitStructure.GPIO_Mode = GPIO_MODE_OUT_PP;
+    GPIO_Peripheral_Initialize(GPIOB, &GPIO_InitStructure);
+    GPIO_Pins_Set(GPIOB, GPIO_PIN_1);
 }
 
 static void User_TIMx_Init(void)
