@@ -178,6 +178,6 @@ void mainDisplay(void)
 {
 	SETUP_LCD(); // ≥ı ºªØLCD
 	DIS(0xf);
-	DELAY(9000000);
+	DELAY(300000);
 	DIS(0);
 }
