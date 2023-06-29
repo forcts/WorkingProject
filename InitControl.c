@@ -257,21 +257,19 @@ void InitUart(void)
     GPIO_Structure_Initialize(&GPIO_InitStructure);
     GPIO_InitStructure.Pin = GPIO_PIN_1;
     GPIO_InitStructure.GPIO_Mode = GPIO_MODE_OUT_PP;
+    GPIO_InitStructure.GPIO_Slew_Rate = GPIO_SLEW_RATE_FAST;
     GPIO_Peripheral_Initialize(GPIOB, &GPIO_InitStructure);
-    GPIO_Pins_Set(GPIOB, GPIO_PIN_1);
 }
 
 static void User_TIMx_Init(void)
 {
     TIM_TimeBaseInitType TIM_TimeBaseStructure;
     TIM_Base_Struct_Initialize(&TIM_TimeBaseStructure);
-    /* Time base configuration */
     TIM_TimeBaseStructure.Period = 0xFFFF;
     TIM_TimeBaseStructure.Prescaler = 0;
     TIM_TimeBaseStructure.ClkDiv = 0;
     TIM_TimeBaseStructure.CntMode = TIM_CNT_MODE_DOWN;
     RCC_APB1_Peripheral_Clock_Enable(RCC_APB1_PERIPH_TIM3);
-
     TIM_Base_Initialize(TIM3, &TIM_TimeBaseStructure);
     TIM_On(TIM3);
 }

@@ -13,23 +13,22 @@ void CommuToBMSTask(void)
 	}
 
 	static u8 i = 0;
+	GPIO_Pins_Set(GPIOB, GPIO_PIN_1); // 使能485芯片发送
 	for (i = 0; i < 8;)
 	{
-		// if (USART_Flag_Status_Get(USART2, USART_FLAG_TXC) == RESET)
-		if (Global.BMS_Send_Flag) // 读取BMS基本信息
-		{
-			USART_Data_Send(USART2, Get_BMS_Info[i++]);
-		}
-		else // 读取单体电压
-		{
-			USART_Data_Send(USART2, Get_Cell_Info[i++]);
-		}
-		while (USART_Flag_Status_Get(USART2, USART_FLAG_TXDE) == RESET) // was USART_FLAG_TXC
-			;
+		if (USART_Flag_Status_Get(USART2, USART_FLAG_TXC) != RESET)
+			if (Global.BMS_Send_Flag) // 读取BMS基本信息
+			{
+				USART_Data_Send(USART2, Get_BMS_Info[i++]);
+			}
+			else // 读取单体电压
+			{
+				USART_Data_Send(USART2, Get_Cell_Info[i++]);
+			}
+		// while (USART_Flag_Status_Get(USART2, USART_FLAG_TXDE) == RESET) // was USART_FLAG_TXC
+		// 	;
 	}
-
-	// while (USART_Flag_Status_Get(USART2, USART_FLAG_TXDE) == RESET) // was USART_FLAG_TXC
-	// 	;
+	GPIO_Pins_Reset(GPIOB, GPIO_PIN_1); // 使能485芯片接收
 }
 
 void DecodeBMS(void)
