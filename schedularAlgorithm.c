@@ -40,7 +40,7 @@ int Create_task(fp ptr_task, uint32_t period, uint8_t priority)
 		{
 			taskQueue[i].ptr_task = ptr_task;
 			taskQueue[i].timeBase.period = period;
-			taskQueue[i].timeBase.timer = 0; // period; // start frome it
+			taskQueue[i].timeBase.timer = 0;
 			taskQueue[i].timeBase.ticks = 0;
 			return i;
 		}
@@ -58,9 +58,9 @@ void Delete_task(taskId_t *task_ID)
 
 	taskQueue[*task_ID].ptr_task = (fp)NULL;
 	taskQueue[*task_ID].timeBase.period = 0;
-	taskQueue[*task_ID].timeBase.timer = 0; // start from it
+	taskQueue[*task_ID].timeBase.timer = 0;
 	taskQueue[*task_ID].timeBase.ticks = 0;
-	*task_ID = NO_TASK_ID; // indicating that it a not-use ID
+	*task_ID = NO_TASK_ID;
 }
 
 void TaskPeriodSet(taskId_t id, uint32_t time)

@@ -1,7 +1,31 @@
 #ifndef _SCHEDULARALGORITHM_H
 #define _SCHEDULARALGORITHM_H
 
-#include "timebase.h"
+#include "n32g430_tim.h"
+
+/*The longest time:(2^16)*1/48MHZ*/
+#define SCHEDULAR_COUNTER_MSK 0x0000FFFF
+#define CONFIG_SCHEDULAR_HZ 48000000 // select timer3    96Mhz
+typedef unsigned long Ticks_t;
+
+#define ROUND_TO(type, val) ((type)((val) < 0 ? (val)-0.5 : (val) + 0.5))
+#define schedular_SecToTicksUserType(type, sec) ROUND_TO(type, (double)CONFIG_SCHEDULAR_HZ *(sec))
+#define schedular_MsToTicksUserType(type, ms) ROUND_TO(type, (double)CONFIG_SCHEDULAR_HZ *(ms) / 1000.0)
+#define schedular_UsToTicksUserType(type, us) ROUND_TO(type, (double)CONFIG_SCHEDULAR_HZ *(us) / 1000000.0)
+#define schedular_SecToTicks(sec) schedular_SecToTicksUserType(Ticks_t, sec)
+#define schedular_MsToTicks(ms) schedular_MsToTicksUserType(Ticks_t, ms)
+#define schedular_UsToTicks(us) schedular_UsToTicksUserType(Ticks_t, us)
+
+static inline Ticks_t scehdular_ElapsedTicket(Ticks_t *p_start_time)
+{
+	Ticks_t now = SCHEDULAR_COUNTER_MSK - TIM3->CNT; // The systick timer is a down counter
+	if (*p_start_time == 0)							 // Restart counter
+		*p_start_time = now;
+	Ticks_t st_Elapsed = 0;
+	st_Elapsed = (now - *p_start_time) & SCHEDULAR_COUNTER_MSK;
+	*p_start_time = now;
+	return (st_Elapsed & SCHEDULAR_COUNTER_MSK);
+}
 
 #define NO_TASK_ID (-1)
 
