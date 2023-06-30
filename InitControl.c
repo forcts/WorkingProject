@@ -1,7 +1,6 @@
 #include "n32g430_rcc.h"
 #include "n32g430_flash.h"
-#include "n32g430_tim.h"
-#include "LCDCtrol.h"
+#include "main.h"
 
 ErrorStatus HSEStartUpStatus;
 enum

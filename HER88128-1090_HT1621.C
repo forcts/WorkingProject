@@ -1,4 +1,3 @@
-#include <LCDCtrol.h>
 #include <main.h>
 
 // рю╢нотй╬ЁЖ        	0    1    2    3    4    5    6    7    8    9

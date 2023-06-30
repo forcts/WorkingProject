@@ -1,4 +1,4 @@
-#include "LCDCtrol.h"
+#include "main.h"
 
 void shortdelay(u16 k)
 {
