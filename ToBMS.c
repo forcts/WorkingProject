@@ -30,91 +30,85 @@ void CommuToBMSTask(void)
 	GPIO_Pins_Reset(GPIOB, GPIO_PIN_1); // 使能485芯片接收
 }
 
-void DecodeBMS(void)
-{
-	/* 校验 */
-	u16 S = 0, j;
-	for (j = 2; j < Global.BMS_Rx[4] + 5; j++)
-		S += Global.BMS_Rx[j];
-	// S = (~S) + 1;
-	if ((Global.BMS_Rx[Global.BMS_Rx_Pos - 2] != ((((~S) + 1) & 0xff00) >> 8)) || (Global.BMS_Rx[Global.BMS_Rx_Pos - 1] != (((~S) + 1) & 0x00ff)))
-	{
-		Global.BMS_Receive_Error = 1;
-		return;
-	}
-
-	/*提取*/
-	j = 5;
-	if (Global.BMS_Send_Flag == 0)
-	{
-		Global.BMS_INFO.Cell_Num = Global.BMS_Rx[4] >> 1;
-		for (S = 0; j < Global.BMS_Rx_Pos - 3;)
-		{
-			Global.BMS_INFO.Cell_Vol[S++] = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
-			j += 2;
-		}
-	}
-	else if (Global.BMS_Send_Flag == 1)
-	{
-		Global.BMS_INFO.Bat_V = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
-		j += 2;
-		Global.BMS_INFO.Bat_I = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
-		j += 2;
-		Global.BMS_INFO.Surplus_Capacity = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
-		j += 2;
-		Global.BMS_INFO.Nominal_Capacity = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
-		j += 2;
-		Global.BMS_INFO.Cycle_Cnt = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
-		j += 2;
-		Global.BMS_INFO.Production_Date = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
-		j += 2;
-		Global.BMS_INFO.Equalize_Sta_L = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
-		j += 2;
-		Global.BMS_INFO.Equalize_Sta_H = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
-		j += 2;
-		Global.BMS_INFO.Fault_Sta.all = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
-		j += 2;
-		Global.BMS_INFO.Soft_Ver = Global.BMS_Rx[j++];
-		Global.BMS_INFO.RSOC = Global.BMS_Rx[j++];
-		Global.BMS_INFO.Fet_Sta = Global.BMS_Rx[j++];
-		Global.BMS_INFO.Cell_Num = Global.BMS_Rx[j++];
-		Global.BMS_INFO.Alarm_Sta.all = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
-		j += 2;
-		Global.BMS_INFO.Ambient_Temp = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
-		j += 2;
-		Global.BMS_INFO.Fet_Temp = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
-		j += 2;
-		Global.BMS_INFO.NTC_Num = Global.BMS_Rx[j++];
-		for (S = 0; j < Global.BMS_Rx_Pos - 2;)
-		{
-			Global.BMS_INFO.NTC_Value[S++] = (Global.BMS_Rx[j] << 8) | Global.BMS_Rx[j + 1];
-			j += 2;
-		}
-	}
-
-	/*还原*/
-	Global.BMS_Send_Flag = ++Global.BMS_Send_Flag % 2;
-	Global.BMS_Receive_Error = 0;
-}
-
 void USART2_IRQHandler(void) // 接收中断
 {
+	static u8 BMS_Rx[BMS_Rx_MAX]; // BMS接收缓存
+	static u8 BMS_Rx_Pos;		  // BMS接收缓存下标
 	Global.BMS_Receive_Timeout = 0;
-	Global.BMS_Rx[Global.BMS_Rx_Pos] = USART2->DAT;
-	if ((Global.BMS_Rx[0] != 0xDD) || (Global.BMS_Rx_Pos > BMS_Rx_MAX - 2))
+	BMS_Rx[BMS_Rx_Pos] = USART2->DAT;
+	if ((BMS_Rx[0] != 0xDD) || (BMS_Rx_Pos > BMS_Rx_MAX - 2))
 	{
-		Global.BMS_Rx_Pos = 0;
+		BMS_Rx_Pos = 0;
 		USART_Flag_Clear(USART2, USART_INT_RXDNE);
 		return;
 	}
-	if (Global.BMS_Rx[Global.BMS_Rx_Pos] == 0x77)
+	if (BMS_Rx[BMS_Rx_Pos] == 0x77)
 	{
-		DecodeBMS();
-		Global.BMS_Rx_Pos = 0;
+		/* 校验 */
+		u16 S = 0, j;
+		for (j = 2; j < BMS_Rx[4] + 5; j++)
+			S += BMS_Rx[j];
+		if ((BMS_Rx[BMS_Rx_Pos - 2] == ((((~S) + 1) & 0xff00) >> 8)) && (BMS_Rx[BMS_Rx_Pos - 1] == (((~S) + 1) & 0x00ff)))
+		{
+			/*提取*/
+			j = 5;
+			if (Global.BMS_Send_Flag == 0)
+			{
+				Global.BMS_INFO.Cell_Num = BMS_Rx[4] >> 1;
+				for (S = 0; j < BMS_Rx_Pos - 3;)
+				{
+					Global.BMS_INFO.Cell_Vol[S++] = (BMS_Rx[j] << 8) | BMS_Rx[j + 1];
+					j += 2;
+				}
+			}
+			else if (Global.BMS_Send_Flag == 1)
+			{
+				Global.BMS_INFO.Bat_V = (BMS_Rx[j] << 8) | BMS_Rx[j + 1];
+				j += 2;
+				Global.BMS_INFO.Bat_I = (BMS_Rx[j] << 8) | BMS_Rx[j + 1];
+				j += 2;
+				Global.BMS_INFO.Surplus_Capacity = (BMS_Rx[j] << 8) | BMS_Rx[j + 1];
+				j += 2;
+				Global.BMS_INFO.Nominal_Capacity = (BMS_Rx[j] << 8) | BMS_Rx[j + 1];
+				j += 2;
+				Global.BMS_INFO.Cycle_Cnt = (BMS_Rx[j] << 8) | BMS_Rx[j + 1];
+				j += 2;
+				Global.BMS_INFO.Production_Date = (BMS_Rx[j] << 8) | BMS_Rx[j + 1];
+				j += 2;
+				Global.BMS_INFO.Equalize_Sta_L = (BMS_Rx[j] << 8) | BMS_Rx[j + 1];
+				j += 2;
+				Global.BMS_INFO.Equalize_Sta_H = (BMS_Rx[j] << 8) | BMS_Rx[j + 1];
+				j += 2;
+				Global.BMS_INFO.Fault_Sta.all = (BMS_Rx[j] << 8) | BMS_Rx[j + 1];
+				j += 2;
+				Global.BMS_INFO.Soft_Ver = BMS_Rx[j++];
+				Global.BMS_INFO.RSOC = BMS_Rx[j++];
+				Global.BMS_INFO.Fet_Sta = BMS_Rx[j++];
+				Global.BMS_INFO.Cell_Num = BMS_Rx[j++];
+				Global.BMS_INFO.Alarm_Sta.all = (BMS_Rx[j] << 8) | BMS_Rx[j + 1];
+				j += 2;
+				Global.BMS_INFO.Ambient_Temp = (BMS_Rx[j] << 8) | BMS_Rx[j + 1];
+				j += 2;
+				Global.BMS_INFO.Fet_Temp = (BMS_Rx[j] << 8) | BMS_Rx[j + 1];
+				j += 2;
+				Global.BMS_INFO.NTC_Num = BMS_Rx[j++];
+				for (S = 0; j < BMS_Rx_Pos - 2;)
+				{
+					Global.BMS_INFO.NTC_Value[S++] = (BMS_Rx[j] << 8) | BMS_Rx[j + 1];
+					j += 2;
+				}
+			}
+			/*还原*/
+			Global.BMS_Send_Flag = ++Global.BMS_Send_Flag % 2;
+			Global.BMS_Receive_Error = 0;
+		}
+		else
+			Global.BMS_Receive_Error = 1;
+		BMS_Rx_Pos = 0;
 		USART_Flag_Clear(USART2, USART_INT_RXDNE);
 		return;
 	}
 
-	Global.BMS_Rx_Pos++;
+	BMS_Rx_Pos++;
 	USART_Flag_Clear(USART2, USART_INT_RXDNE);
 }

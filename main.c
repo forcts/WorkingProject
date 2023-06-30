@@ -14,7 +14,7 @@ int main(void)
 	memset(&Global, 0, sizeof(Global_Var));
 	InitControl();
 	InitTask();
-	while(1)
+	while (1)
 	{
 		TimeBaseHandle();
 		HandleSchedular();
@@ -23,21 +23,28 @@ int main(void)
 
 void DisplayTask(void)
 {
+	if (Global.BMS_Receive_Error) // BMS通讯错误
+	{
+		memset(&Global.BMS_INFO, 0, sizeof(JBD_BMS));
+		ShowErrorAndCharges(1);
+	}
+	else if (Global.DC_Receive_Error) // DC通讯错误
+	{
+		ShowErrorAndCharges(2);
+	}
+	else // 无错误
+	{
+		ShowErrorAndCharges(0);
+	}
 	ShowRSOC(Global.BMS_INFO.RSOC);
 	ShowNoNum(Global.BMS_ID);
-	if (Global.BMS_Receive_Error)
-		ShowErrorAndCharges(1); // BMS通讯错误
-	else if (Global.DC_Receive_Error)
-		ShowErrorAndCharges(2); // DC通讯错误
-	else
-		ShowErrorAndCharges(0); // 无错误
 }
 
 void InitTask(void)
 {
 	InitTaskQueue((taskType *)&taskQueue);
 	Global.CommuToBMSTask_ID = Create_task(&CommuToBMSTask, PERIOD_200MS, PRIORITY_1);
-	Global.CommuToDCTask_ID = Create_task(&CommuToDCTask, PERIOD_2MS, PRIORITY_1);
+	Global.CommuToDCTask_ID = Create_task(&CommuToDCTask, PERIOD_50MS, PRIORITY_1);
 	Global.DisplayTask_ID = Create_task(&DisplayTask, PERIOD_200MS, PRIORITY_1);
 	if (Global.CommuToBMSTask_ID < 0 || Global.CommuToDCTask_ID < 0 || Global.DisplayTask_ID < 0)
 		return;

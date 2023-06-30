@@ -34,9 +34,9 @@
 #define LCD_BL_ON LCD_BL_SET_H
 #define LCD_BL_OFF LCD_BL_SET_L
 
-#define BMS_NTC_MAX 10
-#define BMS_CELL_MAX 32
-#define BMS_Rx_MAX 100
+#define BMS_NTC_MAX 5
+#define BMS_CELL_MAX 20
+#define BMS_Rx_MAX 55
 #define DC_Rx_MAX 100
 #define DC_Tx_MAX 100
 
@@ -121,8 +121,6 @@ typedef struct
 	u8 BMS_Send_Flag;		// BMS发送标志
 	u8 DC_Receive_Timeout;	// DC通讯超时
 	u8 DC_Receive_Error;	// DC通讯错误
-	u8 BMS_Rx[BMS_Rx_MAX];	// BMS接收缓存
-	u8 BMS_Rx_Pos;			// BMS接收缓存下标
 	u8 DC_Rx[DC_Rx_MAX];	// DC接收缓存
 	u8 DC_Rx_Pos;			// DC接收缓存下标
 	u8 DC_Tx[DC_Tx_MAX];	// DC发送缓存
