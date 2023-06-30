@@ -8,9 +8,13 @@ void CommuToBMSTask(void)
 {
 	if (++Global.BMS_Receive_Timeout > 5) // BMS通讯超时
 		Global.BMS_Receive_Error = 1;
-	if (Global.BMS_Receive_Error == 1)
+	if (Global.BMS_Receive_Error == 1) // 通讯超时则发送三种唤醒信息
 		Global.BMS_Send_Flag = ++Global.BMS_Send_Flag % 3;
-	static u8 i = 0;
+	if (Global.BMS_INFO.Soft_Ver != 0) // 通讯正常则降低通讯速度
+		TaskPeriodSet(Global.CommuToBMSTask_ID, PERIOD_1S);
+	else
+		TaskPeriodSet(Global.CommuToBMSTask_ID, PERIOD_200MS);
+	static u8 i;
 	GPIO_Pins_Set(GPIOB, GPIO_PIN_1); // 使能485芯片发送
 	for (i = 0; i < 9; i++)
 	{
@@ -89,7 +93,7 @@ void DecodeBMS(void)
 	}
 
 	/*还原*/
-	Global.BMS_Send_Flag = ++Global.BMS_Send_Flag % 3;
+	Global.BMS_Send_Flag = ++Global.BMS_Send_Flag % 2;
 	Global.BMS_Receive_Error = 0;
 }
 

@@ -31,10 +31,10 @@ void SetSysClockToPLL(uint32_t freq, uint8_t src)
     if (src == SYSCLK_PLLSRC_HSE)
     {
         /* Enable HSE */
-        RCC_HSE_Config(RCC_HSE_ENABLE); // was RCC_ConfigHse(RCC_HSE_ENABLE);
+        RCC_HSE_Config(RCC_HSE_ENABLE);
 
         /* Wait till HSE is ready */
-        HSEStartUpStatus = RCC_HSE_Stable_Wait(); // was RCC_WaitHseStable();
+        HSEStartUpStatus = RCC_HSE_Stable_Wait();
 
         if (HSEStartUpStatus != SUCCESS)
         {
@@ -92,71 +92,57 @@ void SetSysClockToPLL(uint32_t freq, uint8_t src)
         pclk1div = RCC_HCLK_DIV4;
         pclk2div = RCC_HCLK_DIV2;
         break;
-    case 144000000:
-        /* must use HSE as PLL source */
-        /* not needed here
-    latency = FLASH_LATENCY_4;
-    pllsrc = RCC_PLL_SRC_HSE_DIV1;
-    pllmul = RCC_PLL_MUL_18;
-    pclk1div = RCC_HCLK_DIV4;
-    pclk2div = RCC_HCLK_DIV2;
-    break;
-        */
     default:
         while (1)
             ;
     }
 
-    FLASH_Latency_Set(latency); // was FLASH_SetLatency(latency);
+    FLASH_Latency_Set(latency);
 
     /* HCLK = SYSCLK */
-    RCC_Hclk_Config(RCC_SYSCLK_DIV1); // was RCC_ConfigHclk(RCC_SYSCLK_DIV1);
+    RCC_Hclk_Config(RCC_SYSCLK_DIV1);
 
     /* PCLK2 = HCLK */
-    RCC_Pclk2_Config(pclk2div); // was RCC_ConfigPclk2(pclk2div);
+    RCC_Pclk2_Config(pclk2div);
 
     /* PCLK1 = HCLK */
-    RCC_Pclk1_Config(pclk1div); // was RCC_ConfigPclk1(pclk1div);
+    RCC_Pclk1_Config(pclk1div);
 
-    RCC_PLL_Config(pllsrc, pllmul); // was RCC_ConfigPll(pllsrc, pllmul);
+    RCC_PLL_Config(pllsrc, pllmul);
 
     /* Enable PLL */
-    RCC_PLL_Enable(); // was RCC_EnablePll(ENABLE);
+    RCC_PLL_Enable();
 
     /* Wait till PLL is ready */
-    while (RCC_Flag_Status_Get(RCC_FLAG_PLLRD) == RESET) // was RCC_GetFlagStatus
+    while (RCC_Flag_Status_Get(RCC_FLAG_PLLRD) == RESET)
         ;
 
     /* Select PLL as system clock source */
-    RCC_Sysclk_Config(RCC_SYSCLK_SRC_PLLCLK); // was RCC_ConfigSysclk(RCC_SYSCLK_SRC_PLLCLK);
+    RCC_Sysclk_Config(RCC_SYSCLK_SRC_PLLCLK);
 
     /* Wait till PLL is used as system clock source */
-    while (RCC_Sysclk_Source_Get() != 0x08) // was RCC_GetSysclkSrc()
+    while (RCC_Sysclk_Source_Get() != 0x08)
         ;
 }
 
-/* CAN Configuration below */
 void CAN_GPIO_Config(void)
 {
     GPIO_InitType GPIO_InitStructure;
     GPIO_Structure_Initialize(&GPIO_InitStructure);
     RCC_AHB_Peripheral_Clock_Enable(RCC_AHB_PERIPH_GPIOA);
-    /* Configure CAN RX pin */
-    GPIO_InitStructure.Pin = GPIO_PIN_4;
+    GPIO_InitStructure.Pin = GPIO_PIN_4; // RX
     GPIO_InitStructure.GPIO_Mode = GPIO_PULL_UP; // was GPIO_Mode_IPU;
     GPIO_InitStructure.GPIO_Alternate = GPIO_AF2_CAN;
-    GPIO_Peripheral_Initialize(GPIOA, &GPIO_InitStructure); // was GPIO_InitPeripheral(GPIOA, &GPIO_InitStructure);
-    /* Configure CAN TX pin */
-    GPIO_InitStructure.Pin = GPIO_PIN_5;
-    GPIO_InitStructure.GPIO_Mode = GPIO_MODE_AF_PP;          // was GPIO_Mode_AF_PP;
-    GPIO_InitStructure.GPIO_Slew_Rate = GPIO_SLEW_RATE_FAST; // was GPIO_Speed_50MHz;
-    GPIO_Peripheral_Initialize(GPIOA, &GPIO_InitStructure);  // was GPIO_InitPeripheral(GPIOA, &GPIO_InitStructure);
+    GPIO_Peripheral_Initialize(GPIOA, &GPIO_InitStructure);
+    GPIO_InitStructure.Pin = GPIO_PIN_5; // TX
+    GPIO_InitStructure.GPIO_Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStructure.GPIO_Slew_Rate = GPIO_SLEW_RATE_FAST;
+    GPIO_Peripheral_Initialize(GPIOA, &GPIO_InitStructure);
 }
 
 void CAN_Filter_Init(void)
 {
     CAN_FilterInitType CAN_FilterInitStructure;
-    /* CAN filter init */
     CAN_FilterInitStructure.Filter_Num = 0;
     CAN_FilterInitStructure.Filter_Mode = 0;
     CAN_FilterInitStructure.Filter_Scale = 0;
@@ -166,33 +152,27 @@ void CAN_Filter_Init(void)
     CAN_FilterInitStructure.FilterMask_LowId = 0;
     CAN_FilterInitStructure.Filter_FIFOAssignment = 0;
     CAN_FilterInitStructure.Filter_Act = ENABLE;
-    CAN_Filter_Initializes(&CAN_FilterInitStructure); // was CAN_InitFilter(&CAN_FilterInitStructure);
+    CAN_Filter_Initializes(&CAN_FilterInitStructure);
 }
 
 void CAN_Config(void)
 {
     CAN_InitType CAN_InitStructure;
-    /* Configure CAN1 */
-    RCC_APB1_Peripheral_Clock_Enable(RCC_APB1_PERIPH_CAN); // was RCC_EnableAPB1PeriphClk(RCC_APB1_PERIPH_CAN1, ENABLE);
-    /* CAN1 register init */
-    CAN_Reset(CAN); // was CAN_DeInit(CAN1);
-    /* Struct init*/
-    CAN_Structure_Initializes(&CAN_InitStructure); // was CAN_InitStruct(&CAN_InitStructure);
-    /* CAN1 cell init */
+    RCC_APB1_Peripheral_Clock_Enable(RCC_APB1_PERIPH_CAN);
+    CAN_Reset(CAN);
+    CAN_Structure_Initializes(&CAN_InitStructure);
     CAN_InitStructure.TTCM = DISABLE;
     CAN_InitStructure.ABOM = DISABLE;
     CAN_InitStructure.AWKUM = DISABLE;
     CAN_InitStructure.NART = ENABLE;
     CAN_InitStructure.RFLM = DISABLE;
     CAN_InitStructure.TXFP = ENABLE;
-    CAN_InitStructure.OperatingMode = CAN_NORMAL_MODE; // was CAN_Normal_Mode;
-    CAN_InitStructure.RSJW = CAN_RSJW_1TQ;             // was CAN_RSJW_1tq;
-    CAN_InitStructure.TBS1 = CAN_TBS1_15TQ;            // was CAN_TBS1_15tq;
-    CAN_InitStructure.TBS2 = CAN_TBS1_8TQ;             // was CAN_TBS1_8tq;
+    CAN_InitStructure.OperatingMode = CAN_NORMAL_MODE;
+    CAN_InitStructure.RSJW = CAN_RSJW_1TQ;
+    CAN_InitStructure.TBS1 = CAN_TBS1_15TQ;
+    CAN_InitStructure.TBS2 = CAN_TBS1_8TQ;
     CAN_InitStructure.BaudRatePrescaler = 4;
-    /*Initializes the CAN1 */
-    CAN_Initializes(CAN, &CAN_InitStructure); // was CAN_Init(CAN1, &CAN_InitStructure);
-    /* CAN1 filter init */
+    CAN_Initializes(CAN, &CAN_InitStructure);
     CAN_Filter_Init();
 }
 
@@ -204,7 +184,6 @@ void InitCan(void)
 
 void InitLCD(void)
 {
-    /* set GPIO */
     RCC_AHB_Peripheral_Clock_Enable(RCC_AHB_PERIPH_GPIOA);
     GPIO_InitType GPIO_InitStructure;
     GPIO_Structure_Initialize(&GPIO_InitStructure); // very important

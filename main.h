@@ -81,6 +81,9 @@ typedef struct
 
 typedef struct
 {
+	s8 DisplayTask_ID;		// 显示任务ID
+	s8 CommuToDCTask_ID;	// DC通讯任务ID
+	s8 CommuToBMSTask_ID;	// BMS通讯任务ID
 	u8 BMS_Receive_Timeout; // BMS通讯超时
 	u8 BMS_Receive_Error;	// BMS通讯错误
 	u8 BMS_Send_Flag;		// BMS发送标志
