@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "schedularAlgorithm.h"
+#include "string.h"
 
 taskType taskQueue[TASK_NUM];
 fp ready_taskQueue[READY_TASK_NUM];
@@ -11,24 +12,13 @@ void SysErroReport(void)
 
 void InitTaskQueue(taskType *ptr_taskQueue)
 {
-	uint8_t i = 1;
+	memset(ptr_taskQueue, 0, TASK_NUM * sizeof(taskType));
+	memset(ready_taskQueue, NULL, READY_TASK_NUM * sizeof(fp));
+	uint8_t i;
 	ptr_taskQueue[0].ptr_task = &SysErroReport;
-	ptr_taskQueue[0].timeBase.period = 0xffffffff; // was schedular_SecToTicks(300); and schedular_SecToTicks(300) > 0xffffffff
-	ptr_taskQueue[0].timeBase.ticks = 0;
-	ptr_taskQueue[0].timeBase.timer = 0;
-	while (i < TASK_NUM)
-	{
+	ptr_taskQueue[0].timeBase.period = 0xffffffff; // was schedular_SecToTicks(300) where schedular_SecToTicks(300) > 0xffffffff
+	for (i = 1; i < TASK_NUM; i++)
 		ptr_taskQueue[i].ptr_task = (fp)NULL;
-		ptr_taskQueue[i].timeBase.period = 0;
-		ptr_taskQueue[i].timeBase.ticks = 0;
-		ptr_taskQueue[i].timeBase.timer = 0;
-		i++;
-	}
-	i = 0;
-	while (i < READY_TASK_NUM)
-	{
-		ready_taskQueue[i++] = NULL;
-	}
 }
 
 int Create_task(fp ptr_task, uint32_t period, uint8_t priority)

@@ -25,7 +25,7 @@ void DisplayTask(void)
 {
 	if (Global.BMS_Receive_Error) // BMS通讯错误
 	{
-		memset(&Global.BMS_INFO, 0, sizeof(JBD_BMS));
+		memset(&Global.BMS_INFO, 0, sizeof(JBD_BMS)); // BMS信息清空
 		ShowErrorAndCharges(1);
 	}
 	else if (Global.DC_Receive_Error) // DC通讯错误
