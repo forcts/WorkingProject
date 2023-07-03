@@ -3,7 +3,6 @@
 static const u8 Send[][10] = {
 	{0xDD, 0x00, 0xA5, 0x04, 0x00, 0xFF, 0x57, 0x77},			  // 读取单体电压
 	{0xDD, 0x00, 0xA5, 0x03, 0x00, 0xFF, 0x58, 0x77},			  // 读取BMS基本信息
-	{0xDD, 0x00, 0xA5, 0x05, 0x00, 0xFF, 0x56, 0x77},			  // 唤醒作用
 	{0xDD, 0x00, 0x5A, 0xE1, 0x02, 0x00, 0x00, 0xFE, 0xC3, 0x77}, // 充放电开
 	{0xDD, 0x00, 0x5A, 0xE1, 0x02, 0x00, 0x01, 0xFE, 0xC2, 0x77}, // 充电关放电开
 	{0xDD, 0x00, 0x5A, 0xE1, 0x02, 0x00, 0x02, 0xFE, 0xC1, 0x77}, // 充电开放电关
@@ -14,7 +13,6 @@ enum Send_Flags
 {
 	Get_Cell_Info_Flag = 0, // 读取BMS基本信息
 	Get_BMS_Info_Flag,		// 读取单体电压
-	Get_Wake_Info_Flag,		// 唤醒作用
 	CHG_DSG_ON_Flag,		// 充放电开
 	CHG_OFF_DSG_ON_Flag,	// 充电关放电开
 	CHG_ON_DSG_OFF_Flag,	// 充电开放电关
@@ -26,19 +24,16 @@ void CommuToBMSTask(void)
 	if (++Global.BMS_Receive_Timeout > 5) // BMS通讯超时
 	{
 		Global.BMS_Receive_Error = 1;
-		Global.BMS_Send_Flag = ++Global.BMS_Send_Flag % 3; // 通讯超时则发送三种唤醒信息
 		TaskPeriodSet(Global.CommuToBMSTask_ID, PERIOD_200MS);
 	}
-	if (Global.BMS_INFO.Soft_Ver != 0) // 通讯正常则降低通讯速度
+	if (Global.BMS_INFO.RSOC != 0) // 通讯正常则降低通讯速度
 		TaskPeriodSet(Global.CommuToBMSTask_ID, PERIOD_1S);
 	else
 		TaskPeriodSet(Global.CommuToBMSTask_ID, PERIOD_200MS);
-	static u8 i, k;
-	GPIO_Pins_Set(GPIOB, GPIO_PIN_1); // 使能485芯片发送
-	if (Global.BMS_Send_Flag < 3)
-		k = 9;
-	else
+	static u8 i, k = 9;
+	if (Global.BMS_Send_Flag > 1)
 		k = 11;
+	GPIO_Pins_Set(GPIOB, GPIO_PIN_1); // 使能485芯片发送
 	for (i = 0; i < k; i++)
 	{
 		USART_Data_Send(USART2, Send[Global.BMS_Send_Flag][i]);
@@ -48,11 +43,10 @@ void CommuToBMSTask(void)
 	GPIO_Pins_Reset(GPIOB, GPIO_PIN_1); // 使能485芯片接收
 }
 
-u8 BMS_Rx[BMS_Rx_MAX];		 // BMS接收缓存
 void USART2_IRQHandler(void) // 接收中断
 {
-	// static u8 BMS_Rx[BMS_Rx_MAX]; // BMS接收缓存
-	static u8 BMS_Rx_Pos; // BMS接收缓存下标
+	static u8 BMS_Rx[BMS_Rx_MAX]; // BMS接收缓存
+	static u8 BMS_Rx_Pos;		  // BMS接收缓存下标
 	Global.BMS_Receive_Timeout = 0;
 	BMS_Rx[BMS_Rx_Pos] = USART2->DAT;
 	if ((BMS_Rx[0] != 0xDD) || (BMS_Rx_Pos > BMS_Rx_MAX - 2))
@@ -119,10 +113,14 @@ void USART2_IRQHandler(void) // 接收中断
 			}
 			else
 			{
-				if (BMS_Rx[3] == 0 && BMS_Rx_Pos == 7) // 控制成功
-					; // do something
-				else
-					; // do something
+				if (BMS_Rx[3] != 0 || BMS_Rx_Pos != 7) // 控制失败
+				{
+					Global.BMS_Control_Failed++;
+					BMS_Rx_Pos = 0;
+					USART_Flag_Clear(USART2, USART_INT_RXDNE);
+					return;
+				}
+				Global.BMS_Control_Failed = 0;
 			}
 			/*还原*/
 			Global.BMS_Send_Flag = ++Global.BMS_Send_Flag % 2;

@@ -28,9 +28,14 @@ void DisplayTask(void)
 		memset(&Global.BMS_INFO, 0, sizeof(JBD_BMS)); // BMS信息清空
 		ShowErrorAndCharges(1);
 	}
+	else if (Global.BMS_Control_Failed > 3)
+	{
+		Global.BMS_Send_Flag = ++Global.BMS_Send_Flag % 2;
+		ShowErrorAndCharges(1);
+	}
 	else if (Global.DC_Receive_Error) // DC通讯错误
 	{
-		ShowErrorAndCharges(2);
+		ShowErrorAndCharges(3);
 	}
 	else // 无错误
 	{
