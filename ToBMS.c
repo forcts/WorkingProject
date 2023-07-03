@@ -4,10 +4,10 @@ static const u8 Send[][10] = {
 	{0xDD, 0x00, 0xA5, 0x04, 0x00, 0xFF, 0x57, 0x77},			  // 读取单体电压
 	{0xDD, 0x00, 0xA5, 0x03, 0x00, 0xFF, 0x58, 0x77},			  // 读取BMS基本信息
 	{0xDD, 0x00, 0xA5, 0x05, 0x00, 0xFF, 0x56, 0x77},			  // 唤醒作用
-	{0xDD, 0x00, 0xA5, 0xE1, 0x02, 0x00, 0x00, 0xFE, 0xC3, 0x77}, // 充放电开
-	{0xDD, 0x00, 0xA5, 0xE1, 0x02, 0x00, 0x01, 0xFE, 0xC2, 0x77}, // 充电关放电开
-	{0xDD, 0x00, 0xA5, 0xE1, 0x02, 0x00, 0x02, 0xFE, 0xC1, 0x77}, // 充电开放电关
-	{0xDD, 0x00, 0xA5, 0xE1, 0x02, 0x00, 0x03, 0xFE, 0xC0, 0x77}  // 充放电关
+	{0xDD, 0x00, 0x5A, 0xE1, 0x02, 0x00, 0x00, 0xFE, 0xC3, 0x77}, // 充放电开
+	{0xDD, 0x00, 0x5A, 0xE1, 0x02, 0x00, 0x01, 0xFE, 0xC2, 0x77}, // 充电关放电开
+	{0xDD, 0x00, 0x5A, 0xE1, 0x02, 0x00, 0x02, 0xFE, 0xC1, 0x77}, // 充电开放电关
+	{0xDD, 0x00, 0x5A, 0xE1, 0x02, 0x00, 0x03, 0xFE, 0xC0, 0x77}  // 充放电关
 };
 
 enum Send_Flags
@@ -24,16 +24,22 @@ enum Send_Flags
 void CommuToBMSTask(void)
 {
 	if (++Global.BMS_Receive_Timeout > 5) // BMS通讯超时
+	{
 		Global.BMS_Receive_Error = 1;
-	if (Global.BMS_Receive_Error == 1) // 通讯超时则发送三种唤醒信息
-		Global.BMS_Send_Flag = ++Global.BMS_Send_Flag % 3;
+		Global.BMS_Send_Flag = ++Global.BMS_Send_Flag % 3; // 通讯超时则发送三种唤醒信息
+		TaskPeriodSet(Global.CommuToBMSTask_ID, PERIOD_200MS);
+	}
 	if (Global.BMS_INFO.Soft_Ver != 0) // 通讯正常则降低通讯速度
 		TaskPeriodSet(Global.CommuToBMSTask_ID, PERIOD_1S);
 	else
 		TaskPeriodSet(Global.CommuToBMSTask_ID, PERIOD_200MS);
-	static u8 i;
+	static u8 i, k;
 	GPIO_Pins_Set(GPIOB, GPIO_PIN_1); // 使能485芯片发送
-	for (i = 0; i < 9; i++)
+	if (Global.BMS_Send_Flag < 3)
+		k = 9;
+	else
+		k = 11;
+	for (i = 0; i < k; i++)
 	{
 		USART_Data_Send(USART2, Send[Global.BMS_Send_Flag][i]);
 		while (USART_Flag_Status_Get(USART2, USART_FLAG_TXDE) == RESET)
@@ -42,10 +48,11 @@ void CommuToBMSTask(void)
 	GPIO_Pins_Reset(GPIOB, GPIO_PIN_1); // 使能485芯片接收
 }
 
+u8 BMS_Rx[BMS_Rx_MAX];		 // BMS接收缓存
 void USART2_IRQHandler(void) // 接收中断
 {
-	static u8 BMS_Rx[BMS_Rx_MAX]; // BMS接收缓存
-	static u8 BMS_Rx_Pos;		  // BMS接收缓存下标
+	// static u8 BMS_Rx[BMS_Rx_MAX]; // BMS接收缓存
+	static u8 BMS_Rx_Pos; // BMS接收缓存下标
 	Global.BMS_Receive_Timeout = 0;
 	BMS_Rx[BMS_Rx_Pos] = USART2->DAT;
 	if ((BMS_Rx[0] != 0xDD) || (BMS_Rx_Pos > BMS_Rx_MAX - 2))
@@ -109,6 +116,13 @@ void USART2_IRQHandler(void) // 接收中断
 					Global.BMS_INFO.NTC_Value[S++] = (BMS_Rx[j] << 8) | BMS_Rx[j + 1];
 					j += 2;
 				}
+			}
+			else
+			{
+				if (BMS_Rx[3] == 0 && BMS_Rx_Pos == 7) // 控制成功
+					; // do something
+				else
+					; // do something
 			}
 			/*还原*/
 			Global.BMS_Send_Flag = ++Global.BMS_Send_Flag % 2;

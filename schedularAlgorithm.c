@@ -12,8 +12,8 @@ void SysErroReport(void)
 
 void InitTaskQueue(taskType *ptr_taskQueue)
 {
-	memset(ptr_taskQueue, 0, TASK_NUM * sizeof(taskType));
-	memset(ready_taskQueue, NULL, READY_TASK_NUM * sizeof(fp));
+	memset(ptr_taskQueue, 0, sizeof(taskQueue));
+	memset(ready_taskQueue, NULL, sizeof(ready_taskQueue));
 	uint8_t i;
 	ptr_taskQueue[0].ptr_task = &SysErroReport;
 	ptr_taskQueue[0].timeBase.period = 0xffffffff; // was schedular_SecToTicks(300) where schedular_SecToTicks(300) > 0xffffffff
@@ -25,7 +25,6 @@ int Create_task(fp ptr_task, uint32_t period, uint8_t priority)
 {
 	int i = priority;
 	for (; i < TASK_NUM; i++)
-	{
 		if (NULL == taskQueue[i].ptr_task)
 		{
 			taskQueue[i].ptr_task = ptr_task;
@@ -34,18 +33,13 @@ int Create_task(fp ptr_task, uint32_t period, uint8_t priority)
 			taskQueue[i].timeBase.ticks = 0;
 			return i;
 		}
-	}
-
 	return -1;
 }
 
 void Delete_task(taskId_t *task_ID)
 {
 	if (*task_ID < 0)
-	{
 		return;
-	}
-
 	taskQueue[*task_ID].ptr_task = (fp)NULL;
 	taskQueue[*task_ID].timeBase.period = 0;
 	taskQueue[*task_ID].timeBase.timer = 0;
