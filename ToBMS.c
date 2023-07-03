@@ -1,8 +1,25 @@
 #include "main.h"
 
-static const u8 Get_BMS_Info[] = {0xDD, 0x00, 0xA5, 0x03, 0x00, 0xFF, 0x58, 0x77};	// 读取BMS基本信息
-static const u8 Get_Cell_Info[] = {0xDD, 0x00, 0xA5, 0x04, 0x00, 0xFF, 0x57, 0x77}; // 读取单体电压
-static const u8 Get_Wake_Info[] = {0xDD, 0x00, 0xA5, 0x05, 0x00, 0xFF, 0x56, 0x77}; // 唤醒作用
+static const u8 Send[][10] = {
+	{0xDD, 0x00, 0xA5, 0x04, 0x00, 0xFF, 0x57, 0x77},			  // 读取单体电压
+	{0xDD, 0x00, 0xA5, 0x03, 0x00, 0xFF, 0x58, 0x77},			  // 读取BMS基本信息
+	{0xDD, 0x00, 0xA5, 0x05, 0x00, 0xFF, 0x56, 0x77},			  // 唤醒作用
+	{0xDD, 0x00, 0xA5, 0xE1, 0x02, 0x00, 0x00, 0xFE, 0xC3, 0x77}, // 充放电开
+	{0xDD, 0x00, 0xA5, 0xE1, 0x02, 0x00, 0x01, 0xFE, 0xC2, 0x77}, // 充电关放电开
+	{0xDD, 0x00, 0xA5, 0xE1, 0x02, 0x00, 0x02, 0xFE, 0xC1, 0x77}, // 充电开放电关
+	{0xDD, 0x00, 0xA5, 0xE1, 0x02, 0x00, 0x03, 0xFE, 0xC0, 0x77}  // 充放电关
+};
+
+enum Send_Flags
+{
+	Get_Cell_Info_Flag = 0, // 读取BMS基本信息
+	Get_BMS_Info_Flag,		// 读取单体电压
+	Get_Wake_Info_Flag,		// 唤醒作用
+	CHG_DSG_ON_Flag,		// 充放电开
+	CHG_OFF_DSG_ON_Flag,	// 充电关放电开
+	CHG_ON_DSG_OFF_Flag,	// 充电开放电关
+	CHG_DSG_OFF_Flag,		// 充放电关
+};
 
 void CommuToBMSTask(void)
 {
@@ -18,12 +35,7 @@ void CommuToBMSTask(void)
 	GPIO_Pins_Set(GPIOB, GPIO_PIN_1); // 使能485芯片发送
 	for (i = 0; i < 9; i++)
 	{
-		if (Global.BMS_Send_Flag == 0) // 读取单体电压
-			USART_Data_Send(USART2, Get_Cell_Info[i]);
-		else if (Global.BMS_Send_Flag == 1) // 读取BMS基本信息
-			USART_Data_Send(USART2, Get_BMS_Info[i]);
-		else
-			USART_Data_Send(USART2, Get_Wake_Info[i]);
+		USART_Data_Send(USART2, Send[Global.BMS_Send_Flag][i]);
 		while (USART_Flag_Status_Get(USART2, USART_FLAG_TXDE) == RESET)
 			;
 	}
@@ -52,7 +64,7 @@ void USART2_IRQHandler(void) // 接收中断
 		{
 			/*提取*/
 			j = 5;
-			if (Global.BMS_Send_Flag == 0)
+			if (Global.BMS_Send_Flag == Get_Cell_Info_Flag)
 			{
 				Global.BMS_INFO.Cell_Num = BMS_Rx[4] >> 1;
 				for (S = 0; j < BMS_Rx_Pos - 3;)
@@ -61,7 +73,7 @@ void USART2_IRQHandler(void) // 接收中断
 					j += 2;
 				}
 			}
-			else if (Global.BMS_Send_Flag == 1)
+			else if (Global.BMS_Send_Flag == Get_BMS_Info_Flag)
 			{
 				Global.BMS_INFO.Bat_V = (BMS_Rx[j] << 8) | BMS_Rx[j + 1];
 				j += 2;
